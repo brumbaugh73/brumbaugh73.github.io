@@ -125,4 +125,4 @@ Additionally, the line graph depicting Average Sentiment Over Time illustrated a
 
 # Code
 
-Code is in in [Git Repository](https://github.com/brumbaugh73/MP_1T)
+Code is in in this [Git Repository](https://github.com/brumbaugh73/MP_1T)
