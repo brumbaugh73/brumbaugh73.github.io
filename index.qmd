@@ -14,4 +14,5 @@ about:
     - text: Email
       href: mailto:brumba3@stolaf.edu
 ---
-        
+
+I'm a college football player, pilot, and big fan of stock car racing. I am a sophomore at St. Olaf and am Majoring in Statistics and Data Science. I have a private pilots license and am working on my instrument rating. I play offensive tackle in football. My favorite NASCAR driver is Kyle Larson.
