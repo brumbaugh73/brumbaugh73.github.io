@@ -4,17 +4,18 @@ project:
 
 
 website:
-  title: "brumbaugh73.github.io"
+  title: "Sam's Website"
   navbar:
     left:
       - href: index.qmd
         text: Home
       - about.qmd
+      - secondtab.qmd
 
 format:
   html:
     theme:
-      - cosmo
+      - darkly
       - brand
     css: styles.css
     toc: true
