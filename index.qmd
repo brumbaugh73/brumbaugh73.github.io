@@ -1,11 +1,17 @@
 ---
-title: "brumbaugh73.github.io"
+title: "Sam Brumbaugh's Website"
+image: media/photo.JPG
+toc: false
+about:
+  template: jolla
+  image-shape: round
+  image-width: 17em
+  links:
+    - text: Football
+      href: https://athletics.stolaf.edu/sports/football/roster/sam-brumbaugh/13973
+    - text: GitHub
+      href: https://github.com/brumbaugh73
+    - text: Email
+      href: mailto:brumba3@stolaf.edu
 ---
-
-This is a Quarto website.
-
-To learn more about Quarto websites visit <https://quarto.org/docs/websites>.
-
-```{r}
-1 + 1
-```
+        
