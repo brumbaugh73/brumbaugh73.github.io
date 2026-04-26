@@ -1,9 +1,128 @@
 ---
 title: "Mini Project 1"
+links:
+- text: Git Code
+  href: https://github.com/brumbaugh73/MP_1T
 ---
 
-About this site
+```{r include = FALSE}
+#setup chunk 
+library(tidyverse) 
+library(tidytext)
+library(textdata)
 
-```{r}
-1 + 1
+covid_tweet<-read.csv("covid19_tweets.csv")
 ```
+
+```{r include = FALSE}
+#Unnest the words
+covid_tweet_un <- covid_tweet |> 
+  mutate(line = row_number()) |>
+  unnest_tokens(word, text, token = "words") 
+```
+
+
+```{r include = FALSE}
+#Filters to tweets with #covid19
+covid_tweet_unimp<-covid_tweet_un|>
+  mutate(has_covid_hashtag = str_detect(hashtags, ".*[Cc][Oo][Vv][Ii][Dd].*"))|>
+  filter(has_covid_hashtag== TRUE)|>
+  filter(!str_detect(word, "https|t\\.co"))|>
+  mutate(date = str_sub(date, 1, 10),
+         date = ymd(date)) #changes date variable to be a date type variable
+```
+
+```{r include = FALSE}
+#removes all words in the smart stop words library 
+smart_stopwords <- get_stopwords(source = "smart") 
+
+covid_tweet_unimp_stop<-covid_tweet_unimp|>
+  anti_join(smart_stopwords) |>
+  count(word, sort = TRUE) |>
+  filter(word != "NA")
+```
+
+# Introduction 
+The summer of 2020 was a very interesting time. February of 2020 saw COVID19 lock down the world. By summer people were slowly adjusting to the new norm I seek to investigate how people were thinking about covid during that summer. I will do this by looking at Tweets from July 24th to August 30th. I would like to see how people were thinking about Covid during this time by using sentiment analysis. 
+
+# Quick Answer 
+
+How were people feeling during this time. Not good as you can see in the bar chart below the tweets people were sending had almost double the negative words than it had positive words. This time was a negative time in the world so this makes sense. 
+
+```{r echo = FALSE, message = FALSE}
+#Puts in Bing sentiments and makes graph comparing Number of Positive or Negative Words 
+bing_sentiments <- get_sentiments(lexicon = "bing")
+
+covid_tweet_unimp_stop|>   
+  inner_join(bing_sentiments) |>
+  mutate(count = str_count(word))|>
+   group_by(sentiment) |>  
+  summarise(total_count = sum(count, na.rm = TRUE)) |> 
+  ungroup()|>
+ggplot(aes(x = sentiment, y = total_count, fill = sentiment)) +
+  geom_col() +
+  labs(title = "Number of Positive or Negative Words",
+       x = "Sentiment Type",
+       y = "Number of Words") +
+  theme_minimal()
+```
+
+# Deeper Analysis
+
+This is a bar chart showing the number of positive and negative sentiments in words posted in tweets between July 24th to August 30th 2020. On the x axis is type of sentiment. On the y axis is the number of words. The x axis is either negative or positive, and the y axis ranges from 0 to 17500. We see in this chart that positive words are doubled by negative words. 
+
+```{r include = FALSE}
+# Grabs Affin sentiments and produces a tibble
+afinn_sentiments <- get_sentiments(lexicon = "afinn")
+
+
+covid_sentiment<-covid_tweet_unimp_stop |>   
+  inner_join(afinn_sentiments) |>
+  count(value)|>
+  rename(sentiment_score = value,
+         count= n)|>
+  print()
+```
+
+But how much were people in despair using the Afinn Sentiments we can check how negative or positive the sentiments are. It does this by assigning a numeric sentiment from -5 to 5. Below we see a histogram of the sentiments. It has a slight right skew. also has a large peak at -2. this shows that well people were feeling bad the weren in total dispair. 
+
+```{r echo = FALSE}
+#Makes histogram of sentiments from the afinn scores 
+covid_sentiment|>
+  ggplot(aes(x=sentiment_score, y= count))+
+  geom_bar(stat = "identity")+
+  labs(title = "Number of Words with Certain Sentiments",
+       x= "Sentiments",
+       y= "Number of Words") +
+  theme_minimal()
+```
+
+But was there ever a time people were talking positivly during this time. No there was not as seen in the graph below. People very rarely talked positive and if they did it was just for 1 day at a time. most of the time people were somewhat (0- -0.2) to extremely (-0.2- -0.5) negative. This shows that the negatives persisted over the whole period in question
+
+```{r echo = FALSE, message = FALSE}
+#shows the average afinn sentiment per day 
+covid_tweet_unimp|> #cant use covid sentiments so remakes covid sentiments 
+  anti_join(smart_stopwords)|>
+  inner_join(afinn_sentiments)|>
+  group_by(date) |>
+  summarise(average_sentiment = mean(value, na.rm = TRUE)) |> # makes averages
+  ungroup()|>
+  ggplot(aes(x = date, y = average_sentiment)) +
+  geom_line(color = "blue") + 
+  geom_hline(yintercept = 0, color = "red", linetype = 2)+ #highlights where 0 is
+  geom_point(color = "blue") +
+  labs(title = "Average Sentiment Over Time",
+       x = "Date",
+       y = "Average Sentiment Score") +
+  theme_minimal()
+```
+
+# Conclusion
+
+In this analysis, we examined the sentiment expressed in tweets about COVID-19 from July 24th to August 30th, 2020, a time of significant global uncertainty. Utilizing both the Bing and Afinn sentiments, we found that negative sentiments overwhelmingly outnumbered positive ones, nearly doubling in frequency. The bar chart of Number of Positive or Negative Words indicated a prevailing anxiety and pessimism amid vaccine unavailability and social isolation. The histogram of Afinnsentiment scores revealed a pronounced skew toward negative values, particularly at -2, suggesting a widespread yet weary vigilance rather than total despair.
+
+Additionally, the line graph depicting Average Sentiment Over Time illustrated a consistent trend of negativity throughout the analysis period, with only fleeting moments of positivity. These findings capture the emotional landscape of individuals confronting the relentless pressures of the pandemic, shaping public discourse around COVID-19. Overall, this study highlights the importance of sentiment analysis in understanding societal reactions during crises. 
+
+# Code
+
+Code is in in [Git Repository](https://github.com/brumbaugh73/MP_1T)

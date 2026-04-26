@@ -23,41 +23,6 @@ ul.task-list li input[type="checkbox"] {
   margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
   vertical-align: middle;
 }
-/* CSS for syntax highlighting */
-html { -webkit-text-size-adjust: 100%; }
-pre > code.sourceCode { white-space: pre; position: relative; }
-pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
-pre > code.sourceCode > span:empty { height: 1.2em; }
-.sourceCode { overflow: visible; }
-code.sourceCode > span { color: inherit; text-decoration: inherit; }
-div.sourceCode { margin: 1em 0; }
-pre.sourceCode { margin: 0; }
-@media screen {
-div.sourceCode { overflow: auto; }
-}
-@media print {
-pre > code.sourceCode { white-space: pre-wrap; }
-pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
-}
-pre.numberSource code
-  { counter-reset: source-line 0; }
-pre.numberSource code > span
-  { position: relative; left: -4em; counter-increment: source-line; }
-pre.numberSource code > span > a:first-child::before
-  { content: counter(source-line);
-    position: relative; left: -1em; text-align: right; vertical-align: baseline;
-    border: none; display: inline-block;
-    -webkit-touch-callout: none; -webkit-user-select: none;
-    -khtml-user-select: none; -moz-user-select: none;
-    -ms-user-select: none; user-select: none;
-    padding: 0 4px; width: 4em;
-  }
-pre.numberSource { margin-left: 3em;  padding-left: 4px; }
-div.sourceCode
-  {   }
-@media screen {
-pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
-}
 </style>
 
 
@@ -150,8 +115,18 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article page-navbar">
 <!-- sidebar -->
 <!-- margin-sidebar -->
-    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar zindex-bottom">
-        
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">On this page</h2>
+   
+  <ul>
+  <li><a href="#introduction" id="toc-introduction" class="nav-link active" data-scroll-target="#introduction">Introduction</a></li>
+  <li><a href="#quick-answer" id="toc-quick-answer" class="nav-link" data-scroll-target="#quick-answer">Quick Answer</a></li>
+  <li><a href="#deeper-analysis" id="toc-deeper-analysis" class="nav-link" data-scroll-target="#deeper-analysis">Deeper Analysis</a></li>
+  <li><a href="#conclusion" id="toc-conclusion" class="nav-link" data-scroll-target="#conclusion">Conclusion</a></li>
+  <li><a href="#code" id="toc-code" class="nav-link" data-scroll-target="#code">Code</a></li>
+  </ul>
+</nav>
     </div>
 <!-- main -->
 <main class="content" id="quarto-document-content">
@@ -175,15 +150,58 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </header>
 
 
-<p>About this site</p>
+<section id="introduction" class="level1">
+<h1>Introduction</h1>
+<p>The summer of 2020 was a very interesting time. February of 2020 saw COVID19 lock down the world. By summer people were slowly adjusting to the new norm I seek to investigate how people were thinking about covid during that summer. I will do this by looking at Tweets from July 24th to August 30th. I would like to see how people were thinking about Covid during this time by using sentiment analysis.</p>
+</section>
+<section id="quick-answer" class="level1">
+<h1>Quick Answer</h1>
+<p>How were people feeling during this time. Not good as you can see in the bar chart below the tweets people were sending had almost double the negative words than it had positive words. This time was a negative time in the world so this makes sense.</p>
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="dv">1</span> <span class="sc">+</span> <span class="dv">1</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-<div class="cell-output cell-output-stdout">
-<pre><code>[1] 2</code></pre>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="about_files/figure-html/unnamed-chunk-5-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
 </div>
 </div>
+</div>
+</section>
+<section id="deeper-analysis" class="level1">
+<h1>Deeper Analysis</h1>
+<p>This is a bar chart showing the number of positive and negative sentiments in words posted in tweets between July 24th to August 30th 2020. On the x axis is type of sentiment. On the y axis is the number of words. The x axis is either negative or positive, and the y axis ranges from 0 to 17500. We see in this chart that positive words are doubled by negative words.</p>
+<p>But how much were people in despair using the Afinn Sentiments we can check how negative or positive the sentiments are. It does this by assigning a numeric sentiment from -5 to 5. Below we see a histogram of the sentiments. It has a slight right skew. also has a large peak at -2. this shows that well people were feeling bad the weren in total dispair.</p>
+<div class="cell">
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="about_files/figure-html/unnamed-chunk-7-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>But was there ever a time people were talking positivly during this time. No there was not as seen in the graph below. People very rarely talked positive and if they did it was just for 1 day at a time. most of the time people were somewhat (0- -0.2) to extremely (-0.2- -0.5) negative. This shows that the negatives persisted over the whole period in question</p>
+<div class="cell">
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="about_files/figure-html/unnamed-chunk-8-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+</section>
+<section id="conclusion" class="level1">
+<h1>Conclusion</h1>
+<p>In this analysis, we examined the sentiment expressed in tweets about COVID-19 from July 24th to August 30th, 2020, a time of significant global uncertainty. Utilizing both the Bing and Afinn sentiments, we found that negative sentiments overwhelmingly outnumbered positive ones, nearly doubling in frequency. The bar chart of Number of Positive or Negative Words indicated a prevailing anxiety and pessimism amid vaccine unavailability and social isolation. The histogram of Afinnsentiment scores revealed a pronounced skew toward negative values, particularly at -2, suggesting a widespread yet weary vigilance rather than total despair.</p>
+<p>Additionally, the line graph depicting Average Sentiment Over Time illustrated a consistent trend of negativity throughout the analysis period, with only fleeting moments of positivity. These findings capture the emotional landscape of individuals confronting the relentless pressures of the pandemic, shaping public discourse around COVID-19. Overall, this study highlights the importance of sentiment analysis in understanding societal reactions during crises.</p>
+</section>
+<section id="code" class="level1">
+<h1>Code</h1>
+<p>Code is in in Git <a href="https://github.com/brumbaugh73/MP_1T">Repository</a></p>
 
 
+</section>
 
 </main> <!-- /main -->
 <script id="quarto-html-after-body" type="application/javascript">

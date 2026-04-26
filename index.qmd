@@ -7,7 +7,7 @@ about:
   image-shape: round
   image-width: 17em
   links:
-    - text: Football
+    - text: Football Stats
       href: https://athletics.stolaf.edu/sports/football/roster/sam-brumbaugh/13973
     - text: GitHub
       href: https://github.com/brumbaugh73
