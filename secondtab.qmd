@@ -113,7 +113,7 @@ ggplot(numeric_static_df, aes(long, lat, group = group, fill = carfatal07)) +
 
 Numeric variable (interactive plot):
 
-```{r echo = FALSE}
+```{r echo = FALSE, message=FALSE}
 numeric_colors <- colorNumeric(
   palette = "plasma",
   domain = polisci_contig$carfatal07,
@@ -179,7 +179,7 @@ p_categorical_static
 
 Categorical variable (interactive plot):
 
-```{r echo = FALSE}
+```{r echo = FALSE, message=FALSE}
 states_sf_categorical <- states_sf |>
   mutate(name_key = clean_state_key(name)) |>
   left_join(
