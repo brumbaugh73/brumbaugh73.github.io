@@ -3,3 +3,230 @@ title: "Maps"
 
 ---
 
+```{r include=FALSE}
+library(maps)
+library(tidyverse)
+library(sf)
+library(leaflet)
+library(poliscidata)
+```
+
+
+```{r include=FALSE}
+#| message: false
+#| warning: false
+
+# Get info to draw US states for geom_polygon (connect the lat-long points)
+library(maps)
+states_polygon <- as_tibble(map_data("state")) |>
+  select(region, group, order, lat, long)
+
+# See what the state (region) levels look like in states_polygon
+unique(states_polygon$region)
+
+
+# Get info to draw US states for geom_sf and leaflet (simple features object 
+#   with multipolygon geometry column)
+library(sf)
+states_sf <- 
+  read_sf("https://rstudio.github.io/leaflet/json/us-states.geojson") |>
+  select(name, geometry)
+
+# See what the state (name) levels look like in states_sf
+unique(states_sf$name)
+
+
+# Load in state-wise data for filling our choropleth maps
+#   (Note that I selected my two variables of interest to simplify)
+library(poliscidata)   # may have to install first
+polisci_data <- as_tibble(poliscidata::states) |>
+  select(state, carfatal07, cook_index3)
+
+# See what the state (state) levels look like in polisci_data
+unique(polisci_data$state)   # can't see trailing spaces but can see
+                             #   lack of internal spaces
+print(polisci_data)   # can see trailing spaces
+```
+
+
+```{r include=FALSE}
+# More robust normalization for join keys
+clean_state_key <- function(x) {
+  x |>
+    str_to_lower() |>
+    str_squish() |>
+    str_replace_all("\\.", "") |>
+    # common mismatch between datasets can be "District of Columbia" vs "DC"
+    str_replace_all("district of columbia", "dc")
+}
+
+# Data keys
+polisci_data <- as_tibble(poliscidata::states) |>
+  transmute(
+    state = state,
+    carfatal07 = carfatal07,
+    cook_index3 = cook_index3
+  )
+
+# Keep only states that exist in the sf layer (contiguous set / same keyspace)
+contig_names <- states_sf |>
+  st_drop_geometry() |>
+  pull(name) |>
+  unique()
+
+contig_key <- clean_state_key(contig_names)
+
+polisci_contig <- polisci_data |>
+  mutate(state_key = clean_state_key(state)) |>
+  filter(state_key %in% contig_key) |>
+  select(-state_key)
+
+# Polygon keys (maps uses "region")
+states_polygon <- states_polygon |>
+  mutate(region_key = clean_state_key(region))
+
+# Re-add state_key for joining
+polisci_contig_static <- polisci_contig |>
+  mutate(state_key = clean_state_key(state))
+
+```
+
+```{r include=FALSE}
+numeric_static_df <- states_polygon |>
+  left_join(polisci_contig_static, by = c("region_key" = "state_key"))
+```
+
+
+Numeric variable (static plot):
+
+```{r echo = FALSE}
+ggplot(numeric_static_df, aes(long, lat, group = group, fill = carfatal07)) +
+  geom_polygon(color = "white", linewidth = 0.15) +
+  coord_quickmap() +
+  scale_fill_viridis_c(option = "plasma", na.value = "grey80") +
+  labs(
+    title = "US states: Motor vehicle fatalities per 100,000 pop (2007)",
+    fill = "carfatal07"
+  )
+```
+
+
+Numeric variable (interactive plot):
+
+```{r echo = FALSE}
+numeric_colors <- colorNumeric(
+  palette = "plasma",
+  domain = polisci_contig$carfatal07,
+  na.color = "#808080"
+)
+
+states_sf_numeric <- states_sf |>
+  mutate(name_key = clean_state_key(name)) |>
+  left_join(polisci_contig |>
+              mutate(state_key = clean_state_key(state)) |>
+              select(state_key, carfatal07),
+            by = c("name_key" = "state_key")) |>
+  select(name, carfatal07, geometry)
+
+leaflet(states_sf_numeric, options = leafletOptions(zoomControl = TRUE)) |>
+  addProviderTiles("CartoDB.Positron") |>
+  addPolygons(
+    fillColor = ~numeric_colors(carfatal07),
+    fillOpacity = 0.8,
+    color = "white",
+    weight = 1,
+    highlightOptions = highlightOptions(weight = 2, color = "#333", bringToFront = TRUE),
+    label = ~paste0(
+      "<strong>", name, "</strong><br/>",
+      "carfatal07: ", round(carfatal07, 1)
+    ) |>
+      lapply(htmltools::HTML), # ensure HTML labels (optional; safe even if not)
+    labelOptions = labelOptions(
+      direction = "auto",
+      textsize = "13px",
+      style = list("background" = "rgba(255,255,255,0.85)", "padding" = "4px 8px", "border" = "1px solid #ccc"),
+      opacity = 1
+    )
+  ) |>
+  addLegend(
+    pal = numeric_colors,
+    values = ~carfatal07,
+    title = "carfatal07",
+    position = "bottomright"
+  )
+```
+
+
+Categorical variable (static plot):
+
+```{r echo = FALSE}
+categorical_static_df <- numeric_static_df |>
+  mutate(cook_index3 = factor(cook_index3))
+
+p_categorical_static <- ggplot(categorical_static_df, aes(long, lat, group = group, fill = cook_index3)) +
+  geom_polygon(color = "white", linewidth = 0.15) +
+  coord_quickmap() +
+  scale_fill_brewer(palette = "Set2", na.value = "grey80") +
+  labs(
+    title = "US states: Cook Index grouped into 3 categories",
+    fill = "cook_index3"
+  ) +
+  theme_void()
+
+p_categorical_static
+```
+
+
+Categorical variable (interactive plot):
+
+```{r echo = FALSE}
+states_sf_categorical <- states_sf |>
+  mutate(name_key = clean_state_key(name)) |>
+  left_join(
+    polisci_contig |>
+      mutate(state_key = clean_state_key(state)) |>
+      select(state_key, cook_index3),
+    by = c("name_key" = "state_key")
+  ) |>
+  mutate(cook_index3 = factor(cook_index3)) |>
+  select(name, cook_index3, geometry)
+
+categorical_palette <- "RdYlBu"  # Brewer palette option for factors
+cat_colors <- colorFactor(
+  palette = categorical_palette,
+  domain = levels(states_sf_categorical$cook_index3),
+  na.color = "#808080",
+  reverse = FALSE
+)
+
+p_categorical_interactive <- leaflet(states_sf_categorical, options = leafletOptions(zoomControl = TRUE)) |>
+  addProviderTiles("CartoDB.Positron") |>
+  addPolygons(
+    fillColor = ~cat_colors(cook_index3),
+    fillOpacity = 0.85,
+    color = "white",
+    weight = 1,
+    highlightOptions = highlightOptions(weight = 2, color = "#333", bringToFront = TRUE),
+    label = ~paste0(
+      "<strong>", name, "</strong><br/>",
+      "cook_index3: ", as.character(cook_index3)
+    ) |>
+      lapply(htmltools::HTML),
+    labelOptions = labelOptions(
+      direction = "auto",
+      textsize = "13px",
+      style = list("background" = "rgba(255,255,255,0.85)", "padding" = "4px 8px", "border" = "1px solid #ccc"),
+      opacity = 1
+    )
+  ) |>
+  addLegend(
+    pal = cat_colors,
+    values = ~cook_index3,
+    title = "cook_index3",
+    position = "bottomright"
+  )
+
+p_categorical_interactive
+```
+
+
